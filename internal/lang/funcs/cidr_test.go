@@ -17,24 +17,28 @@ func TestCidrHost(t *testing.T) {
 		Prefix  cty.Value
 		Hostnum cty.Value
 		Want    cty.Value
+		ReturnCIDR cty.Value
 		Err     bool
 	}{
 		{
 			cty.StringVal("192.168.1.0/24"),
 			cty.NumberIntVal(5),
 			cty.StringVal("192.168.1.5"),
+			cty.BoolVal(false),
 			false,
 		},
 		{
 			cty.StringVal("192.168.1.0/24"),
 			cty.NumberIntVal(-5),
 			cty.StringVal("192.168.1.251"),
+			cty.BoolVal(false),
 			false,
 		},
 		{
 			cty.StringVal("192.168.1.0/24"),
 			cty.NumberIntVal(-256),
 			cty.StringVal("192.168.1.0"),
+			cty.BoolVal(false),
 			false,
 		},
 		{
@@ -48,43 +52,56 @@ func TestCidrHost(t *testing.T) {
 			cty.StringVal("010.001.0.0/24"),
 			cty.NumberIntVal(6),
 			cty.StringVal("10.1.0.6"),
+			cty.BoolVal(false),
+			false,
+		},
+		{
+			cty.StringVal("10.12.15.192/28"),
+			cty.NumberIntVal(3),
+			cty.StringVal("10.12.15.195/28"),
+			cty.BoolVal(true), // return the CIDR notation too
 			false,
 		},
 		{
 			cty.StringVal("192.168.1.0/30"),
 			cty.NumberIntVal(255),
 			cty.UnknownVal(cty.String),
+			cty.BoolVal(false),
 			true, // 255 doesn't fit in two bits
 		},
 		{
 			cty.StringVal("192.168.1.0/30"),
 			cty.NumberIntVal(-255),
 			cty.UnknownVal(cty.String),
+			cty.BoolVal(false),
 			true, // 255 doesn't fit in two bits
 		},
 		{
 			cty.StringVal("not-a-cidr"),
 			cty.NumberIntVal(6),
 			cty.UnknownVal(cty.String),
+			cty.BoolVal(false),
 			true, // not a valid CIDR mask
 		},
 		{
 			cty.StringVal("10.256.0.0/8"),
 			cty.NumberIntVal(6),
 			cty.UnknownVal(cty.String),
+			cty.BoolVal(false),
 			true, // can't have an octet >255
 		},
 		{ // fractions are Not Ok
 			cty.StringVal("10.256.0.0/8"),
 			cty.NumberFloatVal(.75),
 			cty.UnknownVal(cty.String),
+			cty.BoolVal(false),
 			true,
 		},
 	}
 
 	for _, test := range tests {
-		t.Run(fmt.Sprintf("cidrhost(%#v, %#v)", test.Prefix, test.Hostnum), func(t *testing.T) {
-			got, err := CidrHost(test.Prefix, test.Hostnum)
+		t.Run(fmt.Sprintf("cidrhost(%#v, %#v, %#v)", test.Prefix, test.Hostnum, test.ReturnCIDR), func(t *testing.T) {
+			got, err := CidrHost(test.Prefix, test.Hostnum, test.ReturnCIDR)
 
 			if test.Err {
 				if err == nil {

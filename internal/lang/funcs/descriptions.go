@@ -109,6 +109,7 @@ var DescriptionList = map[string]descriptionEntry{
 		ParamDescription: []string{
 			"`prefix` must be given in CIDR notation, as defined in [RFC 4632 section 3.1](https://tools.ietf.org/html/rfc4632#section-3.1).",
 			"`hostnum` is a whole number that can be represented as a binary integer with no more than the number of digits remaining in the address after the given prefix.",
+                        "`returncidr` defines if the IP address shall be returned in a CIDR notation.",
 		},
 	},
 	"cidrnetmask": {

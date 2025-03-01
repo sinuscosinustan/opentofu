@@ -9,6 +9,7 @@ UPGRADE NOTES:
 * On Windows, OpenTofu now has a more conservative definition of "symlink" which is limited only true [symbolic links](https://learn.microsoft.com/en-us/windows/win32/fileio/symbolic-links), and does not include other [reparse point](https://learn.microsoft.com/en-us/windows/win32/fileio/reparse-points) types such as [junctions](https://learn.microsoft.com/en-us/windows/win32/fileio/hard-links-and-junctions#junctions).
 
     This change fixes a number of edge-cases that caused OpenTofu to interpret paths incorrectly in earlier versions, but may cause new failures if the path you use for the `TEMP` environment variable traverses through directory junctions. Replacing any directory junctions with directory symlinks (e.g. using [`mklink`](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/mklink) with the `/d` parameter instead of the `/j` parameter) should ensure correct treatment.
+* BREAKING CHANGE - The `cidrhost` function now requires a third argument if the IP should be returned in a CIDR notation.
 
 NEW FEATURES:
 
@@ -26,6 +27,7 @@ ENHANCEMENTS:
 * `moved` now supports moving between different types ([#2370](https://github.com/opentofu/opentofu/pull/2370))
 * `moved` block can now be used to migrate from the `null_resource` to the `terraform_data` resource. ([#2481](https://github.com/opentofu/opentofu/pull/2481))
 * Warn on implicit references of providers without a `required_providers` entry. ([#2084](https://github.com/opentofu/opentofu/issues/2084))
+* `cidrhost` now supports returning the calculated IP address in a CIDR notation.
 
 BUG FIXES:
 

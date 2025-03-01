@@ -18,6 +18,7 @@ import (
 
 // CidrHostFunc constructs a function that calculates a full host IP address
 // within a given IP network address prefix.
+// It will return the CIDR notation too if "returncidr" is true.
 var CidrHostFunc = function.New(&function.Spec{
 	Params: []function.Parameter{
 		{
@@ -27,6 +28,10 @@ var CidrHostFunc = function.New(&function.Spec{
 		{
 			Name: "hostnum",
 			Type: cty.Number,
+		},
+		{
+			Name: "returncidr",
+			Type: cty.Bool,
 		},
 	},
 	Type:         function.StaticReturnType(cty.String),
@@ -44,6 +49,16 @@ var CidrHostFunc = function.New(&function.Spec{
 		ip, err := cidr.HostBig(network, hostNum)
 		if err != nil {
 			return cty.UnknownVal(cty.String), err
+		}
+
+		var returnCidr bool
+		if err := gocty.FromCtyValue(args[2], &returnCidr); err != nil {
+			return cty.UnknownVal(cty.String), err
+		}
+
+		if returnCidr {
+			cidrSize, _ := network.Mask.Size()
+			return cty.StringVal(fmt.Sprintf("%s/%d", ip.String(), cidrSize)), nil
 		}
 
 		return cty.StringVal(ip.String()), nil
@@ -271,8 +286,8 @@ var CidrContainsFunc = function.New(&function.Spec{
 })
 
 // CidrHost calculates a full host IP address within a given IP network address prefix.
-func CidrHost(prefix, hostnum cty.Value) (cty.Value, error) {
-	return CidrHostFunc.Call([]cty.Value{prefix, hostnum})
+func CidrHost(prefix, hostnum, returncidr cty.Value) (cty.Value, error) {
+	return CidrHostFunc.Call([]cty.Value{prefix, hostnum, returncidr})
 }
 
 // CidrNetmask converts an IPv4 address prefix given in CIDR notation into a subnet mask address.

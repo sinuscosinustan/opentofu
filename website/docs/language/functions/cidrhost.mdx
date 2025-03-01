@@ -23,6 +23,9 @@ prefix. For more details on how this function interprets CIDR prefixes and
 populates host numbers, see the worked example for
 [`cidrsubnet`](../../language/functions/cidrsubnet.mdx).
 
+`returncidr` will, if true, return the calculated IP address in a CIDR
+notation with the given CIDR in `prefix`.
+
 Conventionally host number zero is used to represent the address of the
 network itself and the host number that would fill all the host bits with
 binary 1 represents the network's broadcast address. These numbers should
@@ -42,12 +45,16 @@ for backward compatibility, but recommend against relying on this behavior.
 ## Examples
 
 ```
-> cidrhost("10.12.112.0/20", 16)
+> cidrhost("10.12.112.0/20", 16, false)
 10.12.112.16
-> cidrhost("10.12.112.0/20", 268)
+> cidrhost("10.12.112.0/20", 268, false)
 10.12.113.12
-> cidrhost("fd00:fd12:3456:7890:00a2::/72", 34)
+> cidrhost("10.12.112.0/20", 16, true)
+10.12.112.16/20
+> cidrhost("fd00:fd12:3456:7890:00a2::/72", 34, false)
 fd00:fd12:3456:7890::22
+> cidrhost("fd00:fd12:3456:7890:00a2::/72", 34, true)
+fd00:fd12:3456:7890::22/72
 ```
 
 ## Related Functions
